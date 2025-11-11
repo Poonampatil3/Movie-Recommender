@@ -141,7 +141,7 @@
             content.innerHTML = '';
 
             try {
-                const response = await fetch('http://localhost:3000/api/admin/users');
+                const response = await fetch('https://movie-recommender-blue.vercel.app/');
                 const data = await response.json();
 
                 loading.style.display = 'none';
