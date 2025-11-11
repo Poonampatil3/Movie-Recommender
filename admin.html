@@ -1,0 +1,246 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Admin Dashboard - CineMatch</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Arial', sans-serif;
+            background: #141414;
+            color: #fff;
+            padding: 20px;
+        }
+
+        .container {
+            max-width: 1400px;
+            margin: 0 auto;
+        }
+
+        h1 {
+            color: #e50914;
+            margin-bottom: 30px;
+            text-align: center;
+        }
+
+        h2 {
+            color: #e50914;
+            margin: 30px 0 15px;
+            padding-bottom: 10px;
+            border-bottom: 2px solid #e50914;
+        }
+
+        .section {
+            background: #222;
+            padding: 20px;
+            border-radius: 10px;
+            margin-bottom: 30px;
+        }
+
+        table {
+            width: 100%;
+            border-collapse: collapse;
+            margin-top: 15px;
+        }
+
+        th, td {
+            padding: 12px;
+            text-align: left;
+            border-bottom: 1px solid #444;
+        }
+
+        th {
+            background: #333;
+            color: #e50914;
+            font-weight: bold;
+        }
+
+        tr:hover {
+            background: #2a2a2a;
+        }
+
+        .loading {
+            text-align: center;
+            padding: 40px;
+            font-size: 18px;
+            color: #aaa;
+        }
+
+        .error {
+            background: #ff4444;
+            color: white;
+            padding: 15px;
+            border-radius: 5px;
+            margin: 20px 0;
+        }
+
+        .refresh-btn {
+            background: #e50914;
+            color: white;
+            border: none;
+            padding: 10px 20px;
+            border-radius: 5px;
+            cursor: pointer;
+            font-size: 16px;
+            margin-bottom: 20px;
+        }
+
+        .refresh-btn:hover {
+            background: #b20710;
+        }
+
+        .count {
+            color: #aaa;
+            font-size: 14px;
+            margin-top: 10px;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>🎬 CineMatch Admin Dashboard</h1>
+        
+        <button class="refresh-btn" onclick="loadData()">🔄 Refresh Data</button>
+
+        <!-- Users Section -->
+        <div class="section">
+            <h2>👥 Registered Users</h2>
+            <div id="users-loading" class="loading">Loading users...</div>
+            <div id="users-error" class="error" style="display: none;"></div>
+            <div id="users-content"></div>
+        </div>
+
+        <!-- Contacts Section -->
+        <div class="section">
+            <h2>📧 Contact Form Submissions</h2>
+            <div id="contacts-loading" class="loading">Loading contacts...</div>
+            <div id="contacts-error" class="error" style="display: none;"></div>
+            <div id="contacts-content"></div>
+        </div>
+    </div>
+
+    <script>
+        async function loadData() {
+            loadUsers();
+            loadContacts();
+        }
+
+        async function loadUsers() {
+            const loading = document.getElementById('users-loading');
+            const error = document.getElementById('users-error');
+            const content = document.getElementById('users-content');
+
+            loading.style.display = 'block';
+            error.style.display = 'none';
+            content.innerHTML = '';
+
+            try {
+                const response = await fetch('http://localhost:3000/api/admin/users');
+                const data = await response.json();
+
+                loading.style.display = 'none';
+
+                if (data.success) {
+                    if (data.users.length === 0) {
+                        content.innerHTML = '<p class="loading">No users registered yet.</p>';
+                    } else {
+                        content.innerHTML = `
+                            <p class="count">Total Users: ${data.users.length}</p>
+                            <table>
+                                <thead>
+                                    <tr>
+                                        <th>#</th>
+                                        <th>Name</th>
+                                        <th>Email</th>
+                                        <th>Registered Date</th>
+                                    </tr>
+                                </thead>
+                                <tbody>
+                                    ${data.users.map((user, index) => `
+                                        <tr>
+                                            <td>${index + 1}</td>
+                                            <td>${user.name}</td>
+                                            <td>${user.email}</td>
+                                            <td>${new Date(user.createdAt).toLocaleString()}</td>
+                                        </tr>
+                                    `).join('')}
+                                </tbody>
+                            </table>
+                        `;
+                    }
+                } else {
+                    throw new Error(data.message);
+                }
+            } catch (err) {
+                loading.style.display = 'none';
+                error.style.display = 'block';
+                error.textContent = 'Error loading users: ' + err.message;
+            }
+        }
+
+        async function loadContacts() {
+            const loading = document.getElementById('contacts-loading');
+            const error = document.getElementById('contacts-error');
+            const content = document.getElementById('contacts-content');
+
+            loading.style.display = 'block';
+            error.style.display = 'none';
+            content.innerHTML = '';
+
+            try {
+                const response = await fetch('http://localhost:3000/api/admin/contacts');
+                const data = await response.json();
+
+                loading.style.display = 'none';
+
+                if (data.success) {
+                    if (data.contacts.length === 0) {
+                        content.innerHTML = '<p class="loading">No contact submissions yet.</p>';
+                    } else {
+                        content.innerHTML = `
+                            <p class="count">Total Contacts: ${data.contacts.length}</p>
+                            <table>
+                                <thead>
+                                    <tr>
+                                        <th>#</th>
+                                        <th>Name</th>
+                                        <th>Email</th>
+                                        <th>Message</th>
+                                        <th>Submitted Date</th>
+                                    </tr>
+                                </thead>
+                                <tbody>
+                                    ${data.contacts.map((contact, index) => `
+                                        <tr>
+                                            <td>${index + 1}</td>
+                                            <td>${contact.name}</td>
+                                            <td>${contact.email}</td>
+                                            <td>${contact.message}</td>
+                                            <td>${new Date(contact.createdAt).toLocaleString()}</td>
+                                        </tr>
+                                    `).join('')}
+                                </tbody>
+                            </table>
+                        `;
+                    }
+                } else {
+                    throw new Error(data.message);
+                }
+            } catch (err) {
+                loading.style.display = 'none';
+                error.style.display = 'block';
+                error.textContent = 'Error loading contacts: ' + err.message;
+            }
+        }
+
+        // Load data on page load
+        loadData();
+    </script>
+</body>
+</html>
