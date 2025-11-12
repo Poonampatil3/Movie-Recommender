@@ -256,7 +256,7 @@
         }
 
         try {
-            const response = await fetch('https://movie-recommender-blue.vercel.app/', {
+            const response = await fetch('https://cinematch-api-m9io.onrender.com/', {
                 method: 'POST',
                 headers: { 'Content-Type': 'application/json' },
                 body: JSON.stringify({ genre: topGenre })
